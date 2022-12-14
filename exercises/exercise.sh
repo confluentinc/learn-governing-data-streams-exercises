@@ -8,10 +8,14 @@ STAGING_DIR=../staging
 
 function help() {
     echo "Usage:"
-    echo "  exercises.sh <Command> <Exercise Filter>"
+    echo "  exercises.sh <Command>"
     echo "  Commands:"
-    echo "    stage - Setup the exercise."
-    echo "    solve - Solve the exercise."
+    echo "    stage <Exercise Filter> - Setup the exercise."
+    echo "        <Exercise Filter> - A portion of the exercise name (eg. the exercise number) that will be used to select the exercise."
+    echo "    solve <Exercise Filter> <File Filter> - Solve the exercise."
+    echo "        <Exercise Filter> - A portion of the exercise name (eg. the exercise number) that will be used to select the exercise."
+    echo "        <File Filter> - (Optional) A portion of a file name that will be used to select while file to copy from the solution."
+    echo "    list - List all exercises."
     echo "  Exercise Filter: A portion of the name of the exercise. Eg. The Exercise Number. If multiple matches are found, the first one will be chosen."
 }
 
@@ -56,22 +60,37 @@ function solve() {
 
 }
 
+function list() {
+    EXERCISES=$(ls $SOLUTIONS_DIR)
+
+    for ex in "${EXERCISES[@]}"
+    do
+        echo "$ex"
+    done
+}
+
 COMMAND=${1:-"help"}
-EXERCISE_FILTER=${2:-""}
-FILE_FILTER=${3:-""}
-
-if [ -z $EXERCISE_FILTER ]; then
-    echo "MISSING EXERCISE ID"
-    help
-    exit 1
-fi
-
 
 ## Determine which command is being requested, and execute it.
 if [ "$COMMAND" = "stage" ]; then
+    EXERCISE_FILTER=${2:-""}
+    if [ -z $EXERCISE_FILTER ]; then
+        echo "MISSING EXERCISE ID"
+        help
+        exit 1
+    fi
     stage $EXERCISE_FILTER
 elif [ "$COMMAND" = "solve" ]; then
+    EXERCISE_FILTER=${2:-""}
+    FILE_FILTER=${3:-""}
+    if [ -z $EXERCISE_FILTER ]; then
+        echo "MISSING EXERCISE ID"
+        help
+        exit 1
+    fi
     solve $EXERCISE_FILTER $FILE_FILTER
+elif [ "$COMMAND" = "list" ]; then
+    list
 elif [ "$COMMAND" = "help" ]; then
     help
 else
