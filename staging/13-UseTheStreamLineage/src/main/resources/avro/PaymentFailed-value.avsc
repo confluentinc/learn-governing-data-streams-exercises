@@ -1,0 +1,28 @@
+{
+    "type":"record",
+    "name":"PaymentFailed",
+    "doc":"An event that is produced each time a payment is successful.",
+    "namespace":"io.confluent",
+    "fields":[
+        {
+            "name":"paymentId",
+            "doc":"A unique identifier for this payment.",
+            "type":"string"
+        },
+        {
+            "name":"orderId",
+            "doc":"The unique identifier for the order that this payment is attached to.",
+            "type":"string"
+        },
+        {
+            "name":"amount",
+            "doc":"The amount of the payment (in US Dollars).",
+            "type":"double"
+        },
+        {
+            "name":"reason",
+            "doc":"A text description for why the payment failed.",
+            "type":"string"
+        }
+    ]
+}	
