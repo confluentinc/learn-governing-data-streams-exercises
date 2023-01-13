@@ -26,7 +26,7 @@ function stage() {
 
     echo "STAGING $EXERCISE"
 
-    cp -r $STAGING_DIR/$EXERCISE/ $EXERCISE_DIR
+    cp -r $STAGING_DIR/$EXERCISE/. $EXERCISE_DIR
 }
 
 function solve() {
@@ -39,7 +39,7 @@ function solve() {
     if [ -z $FILE_FILTER ]; then
         echo "SOLVING $EXERCISE"
     
-        cp -r $SOLUTION/ $EXERCISE_DIR
+        cp -r $SOLUTION/. $EXERCISE_DIR
     else
         WORKING_DIR=$(pwd)
         cd $SOLUTION
