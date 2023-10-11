@@ -23,7 +23,7 @@ public class PaymentService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public static void main(final String[] args) {
-        io.confluent.PaymentService paymentService = new io.confluent.PaymentService();
+        PaymentService paymentService = new PaymentService();
         paymentService.execute();
     }
 
