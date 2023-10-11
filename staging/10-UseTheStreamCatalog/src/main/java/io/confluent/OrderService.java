@@ -28,7 +28,6 @@ public class OrderService {
     public void execute() {
         try {
             Properties props = ProducerConfig.load(SERVICE_NAME, "java.config");
-            props.setProperty("client.id", "OrderService");
 
             try (KafkaProducer<String, OrderCreated> producer = new KafkaProducer<>(props)) {
 
