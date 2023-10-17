@@ -16,11 +16,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <java.version>18</java.version>
-        <confluent.version>7.2.1</confluent.version>
-        <kafka.version>3.2.1</kafka.version>
-        <avro.version>1.11.1</avro.version>
-        <jackson.version>2.14.0-rc2</jackson.version>
-        <slf4j.version>2.0.0</slf4j.version>
+        <confluent.version>7.4.0</confluent.version>
+        <kafka.version>3.6.0</kafka.version>
+        <avro.version>1.11.3</avro.version>
+        <jackson.version>2.15.2</jackson.version>
+        <slf4j.version>2.0.9</slf4j.version>
     </properties>
 
     <repositories>

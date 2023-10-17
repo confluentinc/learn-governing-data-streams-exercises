@@ -18,6 +18,7 @@ public class PaymentService {
     private static final String SERVICE_NAME = "PaymentService";
     private static final String ORDER_CREATED = "OrderCreated";
     private static final String PAYMENT_SUCCEEDED = "PaymentSucceeded";
+    private static final String PAYMENT_FAILED = "PaymentFailed";
     private final Random rnd = new Random();
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -29,12 +30,15 @@ public class PaymentService {
     public void execute() {
         try {
             Properties consumerProps = ConsumerConfig.load(SERVICE_NAME, "java.config");
-            Properties producerProps = ProducerConfig.load(SERVICE_NAME, "java.config");
+            Properties paymentSucceededProducerProps = ProducerConfig.load(SERVICE_NAME+"PaymentSucceeded", "java.config");
+            Properties paymentFailedProducerProps = ProducerConfig.load(SERVICE_NAME+"PaymentFailed", "java.config");
 
             KafkaConsumer<String, OrderCreated> orderCreatedConsumer = new KafkaConsumer<>(consumerProps);
             orderCreatedConsumer.subscribe(Collections.singletonList(ORDER_CREATED));
 
-            KafkaProducer<String, PaymentSucceeded> paymentSucceededProducer = new KafkaProducer<>(producerProps);
+            KafkaProducer<String, PaymentSucceeded> paymentSucceededProducer = new KafkaProducer<>(paymentSucceededProducerProps);
+
+            KafkaProducer<String, PaymentFailed> paymentFailedProducer = new KafkaProducer<>(paymentFailedProducerProps);
 
             while (true) {
                 ConsumerRecords<String, OrderCreated> records = orderCreatedConsumer.poll(Duration.ofMillis(100));
@@ -46,13 +50,21 @@ public class PaymentService {
 
                     final String paymentId = "PaymentId" + rnd.nextInt(1000);
 
-                    final PaymentSucceeded payment = new PaymentSucceeded(paymentId, order.getOrderId(), rnd.nextDouble(0, 1000));
-                    final ProducerRecord<String, PaymentSucceeded> paymentRecord = new ProducerRecord<>(PAYMENT_SUCCEEDED, paymentId, payment);
-                    logger.info("Producing {}: PaymentId = {}, OrderId = {}", PAYMENT_SUCCEEDED, paymentId, order.getOrderId());
-                    paymentSucceededProducer.send(paymentRecord);
+                    if(rnd.nextInt(100) >=10) {
+                        final PaymentSucceeded payment = new PaymentSucceeded(paymentId, order.getOrderId(), rnd.nextDouble(0, 1000));
+                        final ProducerRecord<String, PaymentSucceeded> paymentRecord = new ProducerRecord<>(PAYMENT_SUCCEEDED, paymentId, payment);
+                        logger.info("Producing {}: PaymentId = {}, OrderId = {}", PAYMENT_SUCCEEDED, paymentId, order.getOrderId());
+                        paymentSucceededProducer.send(paymentRecord);
+                    } else {
+                        final PaymentFailed payment = new PaymentFailed(paymentId, order.getOrderId(), rnd.nextDouble(0, 1000), "Insufficient Funds");
+                        final ProducerRecord<String, PaymentFailed> paymentRecord = new ProducerRecord<>(PAYMENT_FAILED, paymentId, payment);
+                        logger.info("Producing {}: PaymentId = {}, OrderId = {}", PAYMENT_FAILED, paymentId, order.getOrderId());
+                        paymentFailedProducer.send(paymentRecord);
+                    }
                 }
 
                 paymentSucceededProducer.flush();
+                paymentFailedProducer.flush();
             }
         } catch (final IOException e) {
             e.printStackTrace();

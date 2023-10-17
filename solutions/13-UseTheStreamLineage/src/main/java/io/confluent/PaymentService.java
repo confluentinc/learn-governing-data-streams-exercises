@@ -30,13 +30,14 @@ public class PaymentService {
     public void execute() {
         try {
             Properties consumerProps = ConsumerConfig.load(SERVICE_NAME, "java.config");
-            Properties producerProps = ProducerConfig.load(SERVICE_NAME, "java.config");
+            Properties paymentSucceededProducerProps = ProducerConfig.load(SERVICE_NAME+"PaymentSucceeded", "java.config");
+            Properties paymentFailedProducerProps = ProducerConfig.load(SERVICE_NAME+"PaymentFailed", "java.config");
 
             KafkaConsumer<String, OrderCreated> orderCreatedConsumer = new KafkaConsumer<>(consumerProps);
             orderCreatedConsumer.subscribe(Collections.singletonList(ORDER_CREATED));
 
-            KafkaProducer<String, PaymentSucceeded> paymentSucceededProducer = new KafkaProducer<>(producerProps);
-            KafkaProducer<String, PaymentFailed> paymentFailedProducer = new KafkaProducer<>(producerProps);
+            KafkaProducer<String, PaymentSucceeded> paymentSucceededProducer = new KafkaProducer<>(paymentSucceededProducerProps);
+            KafkaProducer<String, PaymentFailed> paymentFailedProducer = new KafkaProducer<>(paymentFailedProducerProps);
 
             while (true) {
                 ConsumerRecords<String, OrderCreated> records = orderCreatedConsumer.poll(Duration.ofMillis(100));
