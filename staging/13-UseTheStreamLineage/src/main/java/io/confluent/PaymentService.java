@@ -29,13 +29,12 @@ public class PaymentService {
     public void execute() {
         try {
             Properties consumerProps = ConsumerConfig.load(SERVICE_NAME, "java.config");
-            Properties paymentSucceededProducerProps = ProducerConfig.load(SERVICE_NAME+"PaymentSucceeded", "java.config");
-            Properties paymentFailedProducerProps = ProducerConfig.load(SERVICE_NAME+"PaymentFailed", "java.config");
+            Properties producerProps = ProducerConfig.load(SERVICE_NAME, "java.config");
 
             KafkaConsumer<String, OrderCreated> orderCreatedConsumer = new KafkaConsumer<>(consumerProps);
             orderCreatedConsumer.subscribe(Collections.singletonList(ORDER_CREATED));
 
-            KafkaProducer<String, PaymentSucceeded> paymentSucceededProducer = new KafkaProducer<>(paymentSucceededProducerProps);
+            KafkaProducer<String, Object> paymentResultProducer = new KafkaProducer<>(producerProps);
 
             while (true) {
                 ConsumerRecords<String, OrderCreated> records = orderCreatedConsumer.poll(Duration.ofMillis(100));
@@ -48,12 +47,12 @@ public class PaymentService {
                     final String paymentId = "PaymentId" + rnd.nextInt(1000);
 
                     final PaymentSucceeded payment = new PaymentSucceeded(paymentId, order.getOrderId(), rnd.nextDouble(0, 1000));
-                    final ProducerRecord<String, PaymentSucceeded> paymentRecord = new ProducerRecord<>(PAYMENT_SUCCEEDED, paymentId, payment);
+                    final ProducerRecord<String, Object> paymentRecord = new ProducerRecord<>(PAYMENT_SUCCEEDED, paymentId, payment);
                     logger.info("Producing {}: PaymentId = {}, OrderId = {}", PAYMENT_SUCCEEDED, paymentId, order.getOrderId());
-                    paymentSucceededProducer.send(paymentRecord);
+                    paymentResultProducer.send(paymentRecord);
                 }
 
-                paymentSucceededProducer.flush();
+                paymentResultProducer.flush();
             }
         } catch (final IOException e) {
             e.printStackTrace();
